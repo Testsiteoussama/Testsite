@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f0f0f0;
+    padding: 50px;
+    overflow-x: hidden;
+}
+
+.page1, .page2 {
+    transition: all 1s ease;
+}
+
+button {
+    padding: 15px 30px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#infoForm {
+    display: none;
+    margin-top: 20px;
+    transition: all 1s ease;
+}
+
+#formTitle {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+input {
+    padding: 10px;
+    margin: 10px 0;
+    width: 80%;
+    max-width: 300px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- الصفحة الأولى -->
+<div class="page1">
+    <h1>مرحبا بك!</h1>
+    <button id="enterBtn">ادخل معلوماتك</button>
+</div>
+
+<!-- صفحة النموذج -->
+<div class="page2">
+    <form id="infoForm">
+        <div id="formTitle">اكتب المعلومات المطلوبة لإكمال تسجيل</div>
+        <input type="text" id="name" placeholder="اسمك" required><br>
+        <input type="email" id="email" placeholder="الإيميل" required><br>
+        <button type="submit">أرسل</button>
+    </form>
+</div>
+
+<!-- EmailJS -->
+<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script>
+(function(){
+    emailjs.init("YOUR_USER_ID"); // 🔴 ضع USER ID هنا
+})();
+</script>
+
+<script>
+const enterBtn = document.getElementById("enterBtn");
+const page1 = document.querySelector(".page1");
+const infoForm = document.getElementById("infoForm");
+
+// زر الانتقال للنموذج
+enterBtn.addEventListener("click", () => {
+    page1.style.transform = "translateX(-100vw)";
+    page1.style.opacity = "0";
+
+    setTimeout(() => {
+        page1.style.display = "none";
+        infoForm.style.display = "block";
+    }, 1000);
+});
+
+// إرسال النموذج
+infoForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const userName = document.getElementById("name").value;
+    const userEmail = document.getElementById("email").value;
+
+    emailjs.send(
+        "service_j39gu7v",       // ✅ Service ID
+        "YOUR_TEMPLATE_ID",      // 🔴 Template ID
+        {
+            to_email: userEmail,
+            user_name: userName,
+            message: "تم تسجيلك بنجاح، شكراً لك!"
+        }
+    ).then(() => {
+
+        infoForm.style.transform = "translateX(100vw)";
+        infoForm.style.opacity = "0";
+
+        setTimeout(() => {
+            infoForm.style.display = "none";
+            alert("✅ تم إرسال رسالة تأكيد إلى إيميلك");
+        }, 1000);
+
+    }).catch((error) => {
+        alert("❌ خطأ في الإرسال");
+        console.log(error);
+    });
+});
+</script>
+
+</body>
+</html>
