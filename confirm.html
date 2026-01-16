@@ -2,24 +2,26 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>تأكيد الحساب</title>
 </head>
 <body>
-<h1>جارٍ تأكيد الحساب...</h1>
+
+<h2>جارٍ تأكيد الحساب...</h2>
+
 <script>
-// قراءة البريد من الرابط
-const urlParams = new URLSearchParams(window.location.search);
-const email = urlParams.get("email");
+const email = new URLSearchParams(location.search).get("email");
 
 let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
-let acc = accounts.find(a=>a.email===email);
-if(acc){ acc.confirmed = true; saveAccounts(accounts); alert("✅ تم تأكيد الحساب! يمكنك الآن تسجيل الدخول."); }
-else alert("❌ الحساب غير موجود");
+let user = accounts.find(a=>a.email===email);
 
-function saveAccounts(accs){ localStorage.setItem("accounts", JSON.stringify(accs)); }
-// إعادة توجيه للصفحة الرئيسية / تسجيل الدخول
+if(user){
+    user.confirmed = true;
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+    alert("✅ تم تأكيد الحساب");
+}
+
 window.location.href="index.html";
 </script>
+
 </body>
 </html>
