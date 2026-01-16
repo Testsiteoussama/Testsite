@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تسجيل</title>
+<title>Sign Up</title>
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -38,7 +38,7 @@ button[disabled] {
     margin-top: 5px;
 }
 
-#infoForm {
+#signUpForm {
     display: none;
     margin-top: 20px;
 }
@@ -59,15 +59,16 @@ input {
 
 <div class="page1" id="page1">
     <h1>مرحبا بك!</h1>
-    <button id="enterBtn">احصل على رسالة تأكيد</button>
+    <button id="signUpBtn">Sign Up</button>
     <div id="countdown"></div>
 </div>
 
-<form id="infoForm">
-    <h3>اكتب معلوماتك لإرسال رسالة التأكيد</h3>
+<form id="signUpForm">
+    <h3>أدخل معلوماتك للتسجيل</h3>
     <input type="text" id="name" placeholder="اسمك" required><br>
     <input type="email" id="email" placeholder="الإيميل" required><br>
-    <button type="submit">أرسل الرسالة</button>
+    <input type="password" id="password" placeholder="كلمة المرور" required><br>
+    <button type="submit">أرسل رسالة التأكيد</button>
 </form>
 
 <div class="homePage" id="homePage">
@@ -82,9 +83,9 @@ emailjs.init("S1Mw-eSIERnBhM8ri"); // ✅ Public Key
 </script>
 
 <script>
-const enterBtn = document.getElementById("enterBtn");
+const signUpBtn = document.getElementById("signUpBtn");
 const page1 = document.getElementById("page1");
-const infoForm = document.getElementById("infoForm");
+const signUpForm = document.getElementById("signUpForm");
 const countdownEl = document.getElementById("countdown");
 const homePage = document.getElementById("homePage");
 
@@ -93,7 +94,7 @@ const WAIT_TIME = 10 * 60 * 1000; // 10 دقائق
 // إذا الجهاز مسجل مسبقاً
 if(localStorage.getItem("isRegistered") === "true") {
     page1.style.display = "none";
-    infoForm.style.display = "none";
+    signUpForm.style.display = "none";
     homePage.style.display = "block";
 }
 
@@ -103,7 +104,7 @@ if(lastClickTime) {
     const remaining = WAIT_TIME - (Date.now() - lastClickTime);
     if(remaining > 0) {
         startCountdown(Math.floor(remaining/1000));
-        disableButton(enterBtn, true);
+        disableButton(signUpBtn, true);
     }
 }
 
@@ -118,28 +119,30 @@ function startCountdown(seconds) {
         if(seconds <= 0) {
             clearInterval(interval);
             countdownEl.textContent = "";
-            disableButton(enterBtn, false);
+            disableButton(signUpBtn, false);
         } else {
             countdownEl.textContent = `انتظر ${seconds} ثانية لإعادة المحاولة`;
         }
     }, 1000);
 }
 
-enterBtn.onclick = () => {
+// عرض الفورم عند الضغط
+signUpBtn.onclick = () => {
     page1.style.display = "none";
-    infoForm.style.display = "block";
+    signUpForm.style.display = "block";
 };
 
-// إرسال الرسالة
-infoForm.onsubmit = function(e) {
+// إرسال رسالة التأكيد
+signUpForm.onsubmit = function(e) {
     e.preventDefault();
 
     const userName = document.getElementById("name").value;
     const userEmail = document.getElementById("email").value;
+    const userPassword = document.getElementById("password").value;
 
     // سجل وقت الضغط للانتظار
     localStorage.setItem("lastClickTime", Date.now());
-    disableButton(enterBtn, true);
+    disableButton(signUpBtn, true);
     startCountdown(WAIT_TIME/1000);
 
     // رابط التأكيد
@@ -153,14 +156,13 @@ infoForm.onsubmit = function(e) {
             to_email: userEmail,
             from_name: "موقع التسجيل",
             reply_to: userEmail,
-            // نص [تأكيد الحساب] كـ رابط HTML قابل للضغط
-            message: `✅ اضغط على هذا الرابط لتأكيد حسابك: <a href="${confirmLink}" style="color:white; background-color:#4CAF50; padding:5px 10px; text-decoration:none; border-radius:5px;">[تأكيد الحساب]</a>`
+            message: `✅ اضغط على هذا الرابط لتأكيد حسابك: <a href="${confirmLink}" style="color:white; background-color:#4CAF50; padding:5px 10px; text-decoration:none; border-radius:5px;">[تأكيد الحساب]</a>\nكلمة المرور التي أدخلتها: ${userPassword}`
         }
     )
     .then(() => {
-        alert("📩 تم إرسال رسالة التأكيد إلى إيميلك. يجب الضغط على الرابط داخل الرسالة لتفعيل الحساب.");
-        infoForm.reset();
-        infoForm.style.display = "none";
+        alert("📩 تم إرسال رسالة التأكيد إلى إيميلك. اضغط على الرابط داخل الرسالة لتفعيل الحساب.");
+        signUpForm.reset();
+        signUpForm.style.display = "none";
         page1.style.display = "block";
     })
     .catch((error) => {
