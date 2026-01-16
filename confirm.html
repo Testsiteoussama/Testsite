@@ -7,13 +7,19 @@
 </head>
 <body>
 <h1>جارٍ تأكيد الحساب...</h1>
-
 <script>
-// عند فتح الرابط، يتم تخزين الجهاز كمؤكد
-localStorage.setItem("isRegistered", "true");
-alert("✅ تم تأكيد الحساب! يمكنك الآن تسجيل الدخول.");
-// إعادة توجيه للصفحة الرئيسية
-window.location.href = "index.html";
+// قراءة البريد من الرابط
+const urlParams = new URLSearchParams(window.location.search);
+const email = urlParams.get("email");
+
+let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+let acc = accounts.find(a=>a.email===email);
+if(acc){ acc.confirmed = true; saveAccounts(accounts); alert("✅ تم تأكيد الحساب! يمكنك الآن تسجيل الدخول."); }
+else alert("❌ الحساب غير موجود");
+
+function saveAccounts(accs){ localStorage.setItem("accounts", JSON.stringify(accs)); }
+// إعادة توجيه للصفحة الرئيسية / تسجيل الدخول
+window.location.href="index.html";
 </script>
 </body>
 </html>
