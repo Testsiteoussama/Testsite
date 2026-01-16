@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign Up</title>
+<title>تسجيل / دخول</title>
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -20,7 +20,7 @@ button {
     color: white;
     border: none;
     border-radius: 8px;
-    margin-top: 10px;
+    margin: 10px;
 }
 
 button:hover:not([disabled]) {
@@ -32,13 +32,7 @@ button[disabled] {
     cursor: not-allowed;
 }
 
-#countdown {
-    font-size: 14px;
-    color: #555;
-    margin-top: 5px;
-}
-
-#signUpForm {
+form {
     display: none;
     margin-top: 20px;
 }
@@ -57,18 +51,28 @@ input {
 </head>
 <body>
 
-<div class="page1" id="page1">
-    <h1>مرحبا بك!</h1>
-    <button id="signUpBtn">Sign Up</button>
-    <div id="countdown"></div>
+<h1>مرحبا بك!</h1>
+
+<div id="mainButtons">
+    <button id="signUpBtn">إنشاء حساب</button>
+    <button id="loginBtn">تسجيل الدخول</button>
 </div>
 
+<!-- Sign Up Form -->
 <form id="signUpForm">
-    <h3>أدخل معلوماتك للتسجيل</h3>
-    <input type="text" id="name" placeholder="اسمك" required><br>
-    <input type="email" id="email" placeholder="الإيميل" required><br>
-    <input type="password" id="password" placeholder="كلمة المرور" required><br>
+    <h3>إنشاء حساب جديد</h3>
+    <input type="text" id="signupName" placeholder="اسمك" required><br>
+    <input type="email" id="signupEmail" placeholder="الإيميل" required><br>
+    <input type="password" id="signupPassword" placeholder="كلمة المرور" required><br>
     <button type="submit">أرسل رسالة التأكيد</button>
+</form>
+
+<!-- Login Form -->
+<form id="loginForm">
+    <h3>تسجيل الدخول</h3>
+    <input type="email" id="loginEmail" placeholder="الإيميل" required><br>
+    <input type="password" id="loginPassword" placeholder="كلمة المرور" required><br>
+    <button type="submit">تسجيل الدخول</button>
 </form>
 
 <div class="homePage" id="homePage">
@@ -79,96 +83,94 @@ input {
 <!-- EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
-emailjs.init("S1Mw-eSIERnBhM8ri"); // ✅ Public Key
+emailjs.init("S1Mw-eSIERnBhM8ri");
 </script>
 
 <script>
 const signUpBtn = document.getElementById("signUpBtn");
-const page1 = document.getElementById("page1");
+const loginBtn = document.getElementById("loginBtn");
+const mainButtons = document.getElementById("mainButtons");
+
 const signUpForm = document.getElementById("signUpForm");
-const countdownEl = document.getElementById("countdown");
+const loginForm = document.getElementById("loginForm");
 const homePage = document.getElementById("homePage");
 
-const WAIT_TIME = 10 * 60 * 1000; // 10 دقائق
-
-// إذا الجهاز مسجل مسبقاً
+// تحقق إذا الجهاز مسجل مسبقاً
 if(localStorage.getItem("isRegistered") === "true") {
-    page1.style.display = "none";
+    mainButtons.style.display = "none";
     signUpForm.style.display = "none";
+    loginForm.style.display = "none";
     homePage.style.display = "block";
 }
 
-// عد تنازلي إذا ضغط مسبقاً
-let lastClickTime = localStorage.getItem("lastClickTime");
-if(lastClickTime) {
-    const remaining = WAIT_TIME - (Date.now() - lastClickTime);
-    if(remaining > 0) {
-        startCountdown(Math.floor(remaining/1000));
-        disableButton(signUpBtn, true);
-    }
-}
-
-function disableButton(button, state) {
-    button.disabled = state;
-}
-
-function startCountdown(seconds) {
-    countdownEl.textContent = `انتظر ${seconds} ثانية لإعادة المحاولة`;
-    const interval = setInterval(() => {
-        seconds--;
-        if(seconds <= 0) {
-            clearInterval(interval);
-            countdownEl.textContent = "";
-            disableButton(signUpBtn, false);
-        } else {
-            countdownEl.textContent = `انتظر ${seconds} ثانية لإعادة المحاولة`;
-        }
-    }, 1000);
-}
-
-// عرض الفورم عند الضغط
+// عرض فورم Sign Up
 signUpBtn.onclick = () => {
-    page1.style.display = "none";
+    mainButtons.style.display = "none";
     signUpForm.style.display = "block";
 };
 
-// إرسال رسالة التأكيد
+// عرض فورم Login
+loginBtn.onclick = () => {
+    mainButtons.style.display = "none";
+    loginForm.style.display = "block";
+};
+
+// إرسال رسالة التأكيد Sign Up
 signUpForm.onsubmit = function(e) {
     e.preventDefault();
 
-    const userName = document.getElementById("name").value;
-    const userEmail = document.getElementById("email").value;
-    const userPassword = document.getElementById("password").value;
+    const name = document.getElementById("signupName").value;
+    const email = document.getElementById("signupEmail").value;
+    const password = document.getElementById("signupPassword").value;
 
-    // سجل وقت الضغط للانتظار
-    localStorage.setItem("lastClickTime", Date.now());
-    disableButton(signUpBtn, true);
-    startCountdown(WAIT_TIME/1000);
+    // حفظ معلومات التسجيل مؤقتاً (يمكن تحسينها لاحقاً مع DB)
+    localStorage.setItem("signupEmail", email);
+    localStorage.setItem("signupPassword", password);
 
     // رابط التأكيد
-    const confirmLink = `https://testsiteoussama.github.io/Testsite/confirm.html?email=${encodeURIComponent(userEmail)}`;
+    const confirmLink = `https://testsiteoussama.github.io/Testsite/confirm.html?email=${encodeURIComponent(email)}`;
 
     emailjs.send(
         "service_j39gu7v",
         "template_r2sxa0o",
         {
-            user_name: userName,
-            to_email: userEmail,
+            user_name: name,
+            to_email: email,
             from_name: "موقع التسجيل",
-            reply_to: userEmail,
-            message: `✅ اضغط على هذا الرابط لتأكيد حسابك: <a href="${confirmLink}" style="color:white; background-color:#4CAF50; padding:5px 10px; text-decoration:none; border-radius:5px;">[تأكيد الحساب]</a>\nكلمة المرور التي أدخلتها: ${userPassword}`
+            reply_to: email,
+            message: `✅ اضغط على هذا الرابط لتأكيد حسابك: <a href="${confirmLink}" style="color:white; background-color:#4CAF50; padding:5px 10px; text-decoration:none; border-radius:5px;">[تأكيد الحساب]</a>\nكلمة المرور: ${password}`
         }
     )
     .then(() => {
         alert("📩 تم إرسال رسالة التأكيد إلى إيميلك. اضغط على الرابط داخل الرسالة لتفعيل الحساب.");
         signUpForm.reset();
         signUpForm.style.display = "none";
-        page1.style.display = "block";
+        mainButtons.style.display = "block";
     })
     .catch((error) => {
         alert("❌ خطأ في الإرسال");
         console.log(error);
     });
+};
+
+// تسجيل الدخول Login
+loginForm.onsubmit = function(e) {
+    e.preventDefault();
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+
+    // تحقق من بيانات التسجيل
+    const savedEmail = localStorage.getItem("signupEmail");
+    const savedPassword = localStorage.getItem("signupPassword");
+    const isConfirmed = localStorage.getItem("isRegistered");
+
+    if(email === savedEmail && password === savedPassword && isConfirmed === "true") {
+        alert("✅ تسجيل الدخول ناجح!");
+        loginForm.style.display = "none";
+        homePage.style.display = "block";
+    } else {
+        alert("❌ بيانات غير صحيحة أو الحساب لم يتم تأكيده بعد.");
+    }
 };
 </script>
 
