@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>تسجيل</title>
-
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -14,7 +13,7 @@ body {
     overflow-x: hidden;
 }
 
-.page1 {
+.page1, .homePage {
     transition: all 1s ease;
 }
 
@@ -26,10 +25,23 @@ button {
     color: white;
     border: none;
     border-radius: 8px;
+    margin-top: 10px;
+    position: relative;
 }
 
-button:hover {
+button:hover:not([disabled]) {
     background-color: #45a049;
+}
+
+button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#countdown {
+    font-size: 14px;
+    color: #555;
+    margin-top: 5px;
 }
 
 #infoForm {
@@ -43,14 +55,18 @@ input {
     width: 80%;
     max-width: 300px;
 }
+
+.homePage {
+    display: none;
+}
 </style>
 </head>
-
 <body>
 
 <div class="page1" id="page1">
     <h1>مرحبا بك!</h1>
     <button id="enterBtn">ادخل معلوماتك</button>
+    <div id="countdown"></div>
 </div>
 
 <form id="infoForm">
@@ -60,9 +76,13 @@ input {
     <button type="submit">أرسل</button>
 </form>
 
+<div class="homePage" id="homePage">
+    <h1>الصفحة الرئيسية</h1>
+    <button id="confirmBtn">تأكيد الحساب عبر الإيميل</button>
+</div>
+
 <!-- EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-
 <script>
 emailjs.init("S1Mw-eSIERnBhM8ri"); // ✅ Public Key
 </script>
@@ -71,8 +91,52 @@ emailjs.init("S1Mw-eSIERnBhM8ri"); // ✅ Public Key
 const enterBtn = document.getElementById("enterBtn");
 const page1 = document.getElementById("page1");
 const infoForm = document.getElementById("infoForm");
+const countdownEl = document.getElementById("countdown");
+const homePage = document.getElementById("homePage");
+const confirmBtn = document.getElementById("confirmBtn");
+
+const WAIT_TIME = 10 * 60 * 1000; // 10 دقائق
+
+// تحقق إذا المستخدم مسجل مسبقاً
+if(localStorage.getItem("isRegistered") === "true") {
+    page1.style.display = "none";
+    infoForm.style.display = "none";
+    homePage.style.display = "block";
+}
+
+// تحقق إذا يوجد وقت انتظار
+let lastClickTime = localStorage.getItem("lastClickTime");
+if(lastClickTime) {
+    const remaining = WAIT_TIME - (Date.now() - lastClickTime);
+    if(remaining > 0) {
+        startCountdown(Math.floor(remaining/1000));
+        disableButton(enterBtn, true);
+    }
+}
+
+function disableButton(button, state) {
+    button.disabled = state;
+}
+
+function startCountdown(seconds) {
+    countdownEl.textContent = `انتظر ${seconds} ثانية لإعادة المحاولة`;
+    const interval = setInterval(() => {
+        seconds--;
+        if(seconds <= 0) {
+            clearInterval(interval);
+            countdownEl.textContent = "";
+            disableButton(enterBtn, false);
+        } else {
+            countdownEl.textContent = `انتظر ${seconds} ثانية لإعادة المحاولة`;
+        }
+    }, 1000);
+}
 
 enterBtn.onclick = () => {
+    // سجل وقت الضغط
+    localStorage.setItem("lastClickTime", Date.now());
+    disableButton(enterBtn, true);
+    startCountdown(WAIT_TIME/1000);
     page1.style.display = "none";
     infoForm.style.display = "block";
 };
@@ -97,13 +161,21 @@ infoForm.onsubmit = function(e) {
     .then(() => {
         alert("✅ تم إرسال رسالة تأكيد إلى إيميلك");
         infoForm.reset();
+        localStorage.setItem("isRegistered", "true"); // حفظ حالة التسجيل
+        infoForm.style.display = "none";
+        homePage.style.display = "block";
     })
     .catch((error) => {
         alert("❌ خطأ في الإرسال");
         console.log(error);
     });
 };
-</script>
 
+// زر تأكيد الحساب
+confirmBtn.onclick = () => {
+    alert("✅ تم تأكيد الحساب عبر الإيميل");
+    localStorage.setItem("isRegistered", "true");
+};
+</script>
 </body>
 </html>
