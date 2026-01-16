@@ -14,7 +14,7 @@ body {
     overflow-x: hidden;
 }
 
-.page1, .page2 {
+.page1 {
     transition: all 1s ease;
 }
 
@@ -35,12 +35,6 @@ button:hover {
 #infoForm {
     display: none;
     margin-top: 20px;
-    transition: all 1s ease;
-}
-
-#formTitle {
-    font-size: 18px;
-    margin-bottom: 15px;
 }
 
 input {
@@ -54,76 +48,61 @@ input {
 
 <body>
 
-<!-- الصفحة الأولى -->
-<div class="page1">
+<div class="page1" id="page1">
     <h1>مرحبا بك!</h1>
     <button id="enterBtn">ادخل معلوماتك</button>
 </div>
 
-<!-- صفحة النموذج -->
-<div class="page2">
-    <form id="infoForm">
-        <div id="formTitle">اكتب المعلومات المطلوبة لإكمال تسجيل</div>
-        <input type="text" id="name" placeholder="اسمك" required><br>
-        <input type="email" id="email" placeholder="الإيميل" required><br>
-        <button type="submit">أرسل</button>
-    </form>
-</div>
+<form id="infoForm">
+    <h3>اكتب المعلومات المطلوبة</h3>
+    <input type="text" id="name" placeholder="اسمك" required><br>
+    <input type="email" id="email" placeholder="الإيميل" required><br>
+    <button type="submit">أرسل</button>
+</form>
 
 <!-- EmailJS -->
-<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
 <script>
-(function(){
-    emailjs.init("S1Mw-eSIERnBhM8ri"); // ✅ Public Key
-})();
+emailjs.init("S1Mw-eSIERnBhM8ri"); // ✅ Public Key
 </script>
 
 <script>
 const enterBtn = document.getElementById("enterBtn");
-const page1 = document.querySelector(".page1");
+const page1 = document.getElementById("page1");
 const infoForm = document.getElementById("infoForm");
 
-// زر الانتقال للنموذج
-enterBtn.addEventListener("click", () => {
-    page1.style.transform = "translateX(-100vw)";
-    page1.style.opacity = "0";
+enterBtn.onclick = () => {
+    page1.style.display = "none";
+    infoForm.style.display = "block";
+};
 
-    setTimeout(() => {
-        page1.style.display = "none";
-        infoForm.style.display = "block";
-    }, 1000);
-});
-
-// إرسال النموذج
-infoForm.addEventListener("submit", function(e) {
+infoForm.onsubmit = function(e) {
     e.preventDefault();
 
     const userName = document.getElementById("name").value;
     const userEmail = document.getElementById("email").value;
 
     emailjs.send(
-        "service_j39gu7v",      // ✅ Service ID
-        "template_r2sxa0o",     // ✅ Template ID
+        "service_j39gu7v",
+        "template_r2sxa0o",
         {
             user_name: userName,
             to_email: userEmail,
+            from_name: "موقع التسجيل",
+            reply_to: userEmail,
             message: "تم تسجيلك بنجاح، شكراً لك!"
         }
-    ).then(() => {
-
-        infoForm.style.transform = "translateX(100vw)";
-        infoForm.style.opacity = "0";
-
-        setTimeout(() => {
-            infoForm.style.display = "none";
-            alert("✅ تم إرسال رسالة تأكيد إلى إيميلك");
-        }, 1000);
-
-    }).catch((error) => {
+    )
+    .then(() => {
+        alert("✅ تم إرسال رسالة تأكيد إلى إيميلك");
+        infoForm.reset();
+    })
+    .catch((error) => {
         alert("❌ خطأ في الإرسال");
         console.log(error);
     });
-});
+};
 </script>
 
 </body>
