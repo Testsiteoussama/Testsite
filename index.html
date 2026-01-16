@@ -10,11 +10,6 @@ body {
     text-align: center;
     background-color: #f0f0f0;
     padding: 50px;
-    overflow-x: hidden;
-}
-
-.page1, .homePage {
-    transition: all 1s ease;
 }
 
 button {
@@ -102,7 +97,7 @@ if(localStorage.getItem("isRegistered") === "true") {
     homePage.style.display = "block";
 }
 
-// تحقق إذا يوجد وقت انتظار
+// عد تنازلي
 let lastClickTime = localStorage.getItem("lastClickTime");
 if(lastClickTime) {
     const remaining = WAIT_TIME - (Date.now() - lastClickTime);
@@ -131,12 +126,11 @@ function startCountdown(seconds) {
 }
 
 enterBtn.onclick = () => {
-    // عند الضغط يظهر الفورم لإدخال الإيميل
     page1.style.display = "none";
     infoForm.style.display = "block";
 };
 
-// عند إرسال الفورم لإرسال رسالة التأكيد
+// إرسال الرسالة
 infoForm.onsubmit = function(e) {
     e.preventDefault();
 
@@ -148,6 +142,9 @@ infoForm.onsubmit = function(e) {
     disableButton(enterBtn, true);
     startCountdown(WAIT_TIME/1000);
 
+    // رابط التأكيد
+    const confirmLink = `https://yourwebsite.com/confirm.html?email=${encodeURIComponent(userEmail)}`;
+
     emailjs.send(
         "service_j39gu7v",
         "template_r2sxa0o",
@@ -156,33 +153,20 @@ infoForm.onsubmit = function(e) {
             to_email: userEmail,
             from_name: "موقع التسجيل",
             reply_to: userEmail,
-            message: "✅ اضغط هذا الزر في الموقع لتأكيد حسابك: \n[تأكيد الحساب]"
+            message: `✅ اضغط على هذا الرابط لتأكيد حسابك: [تأكيد الحساب] \n${confirmLink}`
         }
     )
     .then(() => {
-        alert("📩 تم إرسال رسالة التأكيد إلى إيميلك. يجب الضغط على رابط التأكيد داخل الرسالة لتفعيل الحساب.");
+        alert("📩 تم إرسال رسالة التأكيد إلى إيميلك. يجب الضغط على الرابط داخل الرسالة لتفعيل الحساب.");
         infoForm.reset();
         infoForm.style.display = "none";
-        page1.style.display = "block"; // نرجع للصفحة الأولى لكن الزر معطل مؤقتاً
+        page1.style.display = "block";
     })
     .catch((error) => {
         alert("❌ خطأ في الإرسال");
         console.log(error);
     });
 };
-
-// هذه الدالة تحاكي الضغط على زر التأكيد من الإيميل
-// في الواقع، يجب أن يكون رابط في الإيميل يعيدك لصفحة مع كود لتأكيد الحساب
-function confirmAccount() {
-    alert("✅ تم تأكيد الحساب!");
-    localStorage.setItem("isRegistered", "true");
-    page1.style.display = "none";
-    infoForm.style.display = "none";
-    homePage.style.display = "block";
-}
-
-// مثال: لتجربة، يمكنك استدعاء confirmAccount() من console
-// confirmAccount();
 </script>
 
 </body>
