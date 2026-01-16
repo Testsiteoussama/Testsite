@@ -3,25 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>الصفحة الرئيسية</title>
-<style>
-body { font-family: Arial; text-align:center; background:#f0f0f0; padding:40px; }
-button { padding:10px 20px; margin-top:20px; border:none; border-radius:5px; background:#f44336; color:white; cursor:pointer; }
-</style>
+<title>تأكيد الحساب</title>
 </head>
 <body>
-
-<h1>الصفحة الرئيسية</h1>
-<p>أنت الآن مسجل ومؤكد ✅</p>
-
-<button onclick="logout()">تسجيل الخروج</button>
-
+<h1>جارٍ تأكيد الحساب...</h1>
 <script>
-function logout(){
-    localStorage.removeItem("loggedIn");
-    window.location.href="index.html";
-}
-</script>
+// قراءة البريد من الرابط
+const urlParams = new URLSearchParams(window.location.search);
+const email = urlParams.get("email");
 
+let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+let acc = accounts.find(a=>a.email===email);
+if(acc){ acc.confirmed = true; localStorage.setItem("accounts", JSON.stringify(accounts)); alert("✅ تم تأكيد الحساب! يمكنك الآن تسجيل الدخول."); }
+else alert("❌ الحساب غير موجود");
+
+window.location.href="index.html";
+</script>
 </body>
 </html>
