@@ -74,7 +74,7 @@ input {
 <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
 <script>
 (function(){
-    emailjs.init("YOUR_USER_ID"); // 🔴 ضع USER ID هنا
+    emailjs.init("S1Mw-eSIERnBhM8ri"); // ✅ Public Key
 })();
 </script>
 
@@ -102,11 +102,11 @@ infoForm.addEventListener("submit", function(e) {
     const userEmail = document.getElementById("email").value;
 
     emailjs.send(
-        "service_j39gu7v",       // ✅ Service ID
-        "YOUR_TEMPLATE_ID",      // 🔴 Template ID
+        "service_j39gu7v",      // ✅ Service ID
+        "template_r2sxa0o",     // ✅ Template ID
         {
-            to_email: userEmail,
             user_name: userName,
+            to_email: userEmail,
             message: "تم تسجيلك بنجاح، شكراً لك!"
         }
     ).then(() => {
