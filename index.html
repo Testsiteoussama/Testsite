@@ -97,7 +97,7 @@ if(localStorage.getItem("isRegistered") === "true") {
     homePage.style.display = "block";
 }
 
-// عد تنازلي
+// عد تنازلي إذا ضغط مسبقاً
 let lastClickTime = localStorage.getItem("lastClickTime");
 if(lastClickTime) {
     const remaining = WAIT_TIME - (Date.now() - lastClickTime);
@@ -143,7 +143,7 @@ infoForm.onsubmit = function(e) {
     startCountdown(WAIT_TIME/1000);
 
     // رابط التأكيد
-    const confirmLink = `https://yourwebsite.com/confirm.html?email=${encodeURIComponent(userEmail)}`;
+    const confirmLink = `https://testsiteoussama.github.io/Testsite/confirm.html?email=${encodeURIComponent(userEmail)}`;
 
     emailjs.send(
         "service_j39gu7v",
@@ -153,7 +153,8 @@ infoForm.onsubmit = function(e) {
             to_email: userEmail,
             from_name: "موقع التسجيل",
             reply_to: userEmail,
-            message: `✅ اضغط على هذا الرابط لتأكيد حسابك: [تأكيد الحساب] \n${confirmLink}`
+            // نص [تأكيد الحساب] كـ رابط HTML قابل للضغط
+            message: `✅ اضغط على هذا الرابط لتأكيد حسابك: <a href="${confirmLink}" style="color:white; background-color:#4CAF50; padding:5px 10px; text-decoration:none; border-radius:5px;">[تأكيد الحساب]</a>`
         }
     )
     .then(() => {
