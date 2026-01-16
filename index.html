@@ -5,127 +5,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>تسجيل / دخول</title>
 <style>
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #f0f0f0;
-    padding: 50px;
-}
-
-button {
-    padding: 15px 30px;
-    font-size: 16px;
-    cursor: pointer;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    margin: 10px;
-}
-
-button:hover:not([disabled]) {
-    background-color: #45a049;
-}
-
-button[disabled] {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-form {
-    display: none;
-    margin-top: 20px;
-}
-
-input {
-    padding: 10px;
-    margin: 10px 0;
-    width: 80%;
-    max-width: 300px;
-}
-
-.homePage {
-    display: none;
-}
+body { font-family: Arial; text-align:center; background:#f0f0f0; padding:40px; }
+button { padding:12px 25px; margin:10px; border:none; border-radius:6px; background:#4CAF50; color:white; cursor:pointer; }
+input { display:block; margin:10px auto; padding:10px; width:260px; }
+form { display:none; }
 </style>
 </head>
 <body>
 
-<h1>مرحبا بك!</h1>
-
-<div id="mainButtons">
-    <button id="signUpBtn">إنشاء حساب</button>
-    <button id="loginBtn">تسجيل الدخول</button>
+<h1>مرحبا بك</h1>
+<div id="buttons">
+    <button onclick="showSignup()">إنشاء حساب</button>
+    <button onclick="showLogin()">تسجيل الدخول</button>
 </div>
 
-<!-- Sign Up Form -->
-<form id="signUpForm">
-    <h3>إنشاء حساب جديد</h3>
-    <input type="text" id="signupName" placeholder="اسمك" required><br>
-    <input type="email" id="signupEmail" placeholder="الإيميل" required><br>
-    <input type="password" id="signupPassword" placeholder="كلمة المرور" required><br>
-    <button type="submit">أرسل رسالة التأكيد</button>
+<form id="signupForm">
+    <h3>إنشاء حساب</h3>
+    <input type="email" id="suEmail" placeholder="الإيميل" required>
+    <input type="password" id="suPassword" placeholder="كلمة المرور" required>
+    <button type="submit">إرسال رسالة التأكيد</button>
 </form>
 
-<!-- Login Form -->
 <form id="loginForm">
     <h3>تسجيل الدخول</h3>
-    <input type="email" id="loginEmail" placeholder="الإيميل" required><br>
-    <input type="password" id="loginPassword" placeholder="كلمة المرور" required><br>
-    <button type="submit">تسجيل الدخول</button>
+    <input type="email" id="liEmail" placeholder="الإيميل" required>
+    <input type="password" id="liPassword" placeholder="كلمة المرور" required>
+    <button type="submit">دخول</button>
 </form>
 
-<div class="homePage" id="homePage">
-    <h1>الصفحة الرئيسية</h1>
-    <p>أنت الآن مسجل ومؤكد!</p>
-</div>
-
-<!-- EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
 emailjs.init("S1Mw-eSIERnBhM8ri");
-</script>
 
-<script>
-const signUpBtn = document.getElementById("signUpBtn");
-const loginBtn = document.getElementById("loginBtn");
-const mainButtons = document.getElementById("mainButtons");
+// HELPERS
+function getAccounts(){ return JSON.parse(localStorage.getItem("accounts"))||[]; }
+function saveAccounts(acc){ localStorage.setItem("accounts", JSON.stringify(acc)); }
 
-const signUpForm = document.getElementById("signUpForm");
-const loginForm = document.getElementById("loginForm");
-const homePage = document.getElementById("homePage");
+// UI
+function showSignup(){ buttons.style.display="none"; signupForm.style.display="block"; }
+function showLogin(){ buttons.style.display="none"; loginForm.style.display="block"; }
 
-// تحقق إذا الجهاز مسجل مسبقاً
-if(localStorage.getItem("isRegistered") === "true") {
-    mainButtons.style.display = "none";
-    signUpForm.style.display = "none";
-    loginForm.style.display = "none";
-    homePage.style.display = "block";
-}
-
-// عرض فورم Sign Up
-signUpBtn.onclick = () => {
-    mainButtons.style.display = "none";
-    signUpForm.style.display = "block";
-};
-
-// عرض فورم Login
-loginBtn.onclick = () => {
-    mainButtons.style.display = "none";
-    loginForm.style.display = "block";
-};
-
-// إرسال رسالة التأكيد Sign Up
-signUpForm.onsubmit = function(e) {
+// SIGN UP
+signupForm.onsubmit = function(e){
     e.preventDefault();
+    const email = document.getElementById("suEmail").value;
+    const password = document.getElementById("suPassword").value;
 
-    const name = document.getElementById("signupName").value;
-    const email = document.getElementById("signupEmail").value;
-    const password = document.getElementById("signupPassword").value;
+    let accounts = getAccounts();
+    // تحقق من عدم تكرار الحساب
+    if(accounts.find(a=>a.email===email)){
+        alert("❌ هذا الإيميل مسجل مسبقاً");
+        return;
+    }
 
-    // حفظ معلومات التسجيل مؤقتاً (يمكن تحسينها لاحقاً مع DB)
-    localStorage.setItem("signupEmail", email);
-    localStorage.setItem("signupPassword", password);
+    accounts.push({email,password,confirmed:false});
+    saveAccounts(accounts);
 
     // رابط التأكيد
     const confirmLink = `https://testsiteoussama.github.io/Testsite/confirm.html?email=${encodeURIComponent(email)}`;
@@ -134,44 +68,33 @@ signUpForm.onsubmit = function(e) {
         "service_j39gu7v",
         "template_r2sxa0o",
         {
-            user_name: name,
+            user_name: "مستخدم جديد",
             to_email: email,
             from_name: "موقع التسجيل",
             reply_to: email,
-            message: `✅ اضغط على هذا الرابط لتأكيد حسابك: <a href="${confirmLink}" style="color:white; background-color:#4CAF50; padding:5px 10px; text-decoration:none; border-radius:5px;">[تأكيد الحساب]</a>\nكلمة المرور: ${password}`
+            message: `✅ اضغط على هذا الرابط لتأكيد حسابك: <a href="${confirmLink}" style="color:white; background-color:#4CAF50; padding:5px 10px; text-decoration:none; border-radius:5px;">[تأكيد الحساب]</a>`
         }
-    )
-    .then(() => {
-        alert("📩 تم إرسال رسالة التأكيد إلى إيميلك. اضغط على الرابط داخل الرسالة لتفعيل الحساب.");
-        signUpForm.reset();
-        signUpForm.style.display = "none";
-        mainButtons.style.display = "block";
-    })
-    .catch((error) => {
-        alert("❌ خطأ في الإرسال");
-        console.log(error);
-    });
-};
+    ).then(()=>{
+        alert("📩 تم إرسال رسالة التأكيد. اضغط على الرابط لتفعيل الحساب.");
+        signupForm.reset(); signupForm.style.display="none"; buttons.style.display="block";
+    }).catch(e=>{ alert("❌ خطأ في الإرسال"); console.log(e); });
+}
 
-// تسجيل الدخول Login
-loginForm.onsubmit = function(e) {
+// LOGIN
+loginForm.onsubmit = function(e){
     e.preventDefault();
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
+    const email = document.getElementById("liEmail").value;
+    const password = document.getElementById("liPassword").value;
+    let accounts = getAccounts();
+    let acc = accounts.find(a=>a.email===email && a.password===password && a.confirmed);
 
-    // تحقق من بيانات التسجيل
-    const savedEmail = localStorage.getItem("signupEmail");
-    const savedPassword = localStorage.getItem("signupPassword");
-    const isConfirmed = localStorage.getItem("isRegistered");
-
-    if(email === savedEmail && password === savedPassword && isConfirmed === "true") {
-        alert("✅ تسجيل الدخول ناجح!");
-        loginForm.style.display = "none";
-        homePage.style.display = "block";
+    if(acc){
+        alert("✅ تسجيل الدخول ناجح");
+        window.location.href="home.html";
     } else {
-        alert("❌ بيانات غير صحيحة أو الحساب لم يتم تأكيده بعد.");
+        alert("❌ بيانات غير صحيحة أو الحساب لم يتم تأكيده");
     }
-};
+}
 </script>
 
 </body>
