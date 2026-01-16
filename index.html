@@ -14,12 +14,12 @@ form { display:none; }
 <body>
 
 <h1>مرحبا بك</h1>
+
 <div id="buttons">
     <button onclick="showSignup()">إنشاء حساب</button>
     <button onclick="showLogin()">تسجيل الدخول</button>
 </div>
 
-<!-- SIGN UP FORM -->
 <form id="signupForm">
     <h3>إنشاء حساب</h3>
     <input type="email" id="suEmail" placeholder="الإيميل" required>
@@ -27,7 +27,6 @@ form { display:none; }
     <button type="submit">إرسال رسالة التأكيد</button>
 </form>
 
-<!-- LOGIN FORM -->
 <form id="loginForm">
     <h3>تسجيل الدخول</h3>
     <input type="email" id="liEmail" placeholder="الإيميل" required>
@@ -39,24 +38,28 @@ form { display:none; }
 <script>
 emailjs.init("S1Mw-eSIERnBhM8ri");
 
-// ======== HELPERS ========
+/* ====== AUTO LOGIN ====== */
+if (
+    localStorage.getItem("loggedIn") === "true" &&
+    localStorage.getItem("currentUser")
+) {
+    window.location.href = "home.html";
+}
+
+/* ====== HELPERS ====== */
 function getAccounts(){ return JSON.parse(localStorage.getItem("accounts")) || []; }
 function saveAccounts(acc){ localStorage.setItem("accounts", JSON.stringify(acc)); }
 
-// ======== AUTO REDIRECT IF LOGGED IN ========
-if(localStorage.getItem("loggedIn") === "true"){
-    window.location.href="home.html";
-}
-
-// ======== UI FUNCTIONS ========
+/* ====== UI ====== */
 function showSignup(){ buttons.style.display="none"; signupForm.style.display="block"; }
 function showLogin(){ buttons.style.display="none"; loginForm.style.display="block"; }
 
-// ======== SIGN UP ========
+/* ====== SIGN UP ====== */
 signupForm.onsubmit = function(e){
     e.preventDefault();
-    const email = document.getElementById("suEmail").value;
-    const password = document.getElementById("suPassword").value;
+
+    const email = suEmail.value;
+    const password = suPassword.value;
 
     let accounts = getAccounts();
     if(accounts.find(a=>a.email===email)){
@@ -64,45 +67,51 @@ signupForm.onsubmit = function(e){
         return;
     }
 
-    accounts.push({email,password,confirmed:false});
+    accounts.push({ email, password, confirmed:false });
     saveAccounts(accounts);
 
-    const confirmLink = `https://testsiteoussama.github.io/Testsite/confirm.html?email=${encodeURIComponent(email)}`;
+    const confirmLink =
+    `https://testsiteoussama.github.io/Testsite/confirm.html?email=${encodeURIComponent(email)}`;
 
     emailjs.send(
         "service_j39gu7v",
         "template_r2sxa0o",
         {
-            user_name: "مستخدم جديد",
             to_email: email,
-            from_name: "موقع التسجيل",
-            reply_to: email,
-            message: `✅ اضغط على هذا الرابط لتأكيد حسابك: <a href="${confirmLink}" style="color:white; background-color:#4CAF50; padding:5px 10px; text-decoration:none; border-radius:5px;">[تأكيد الحساب]</a>`
+            message: `اضغط هنا لتأكيد حسابك:
+            <a href="${confirmLink}"
+            style="display:inline-block;padding:8px 15px;background:#4CAF50;color:white;border-radius:5px;text-decoration:none">
+            [تأكيد الحساب]</a>`
         }
     ).then(()=>{
-        alert("📩 تم إرسال رسالة التأكيد. اضغط على الرابط لتفعيل الحساب.");
-        signupForm.reset(); signupForm.style.display="none"; buttons.style.display="block";
-    }).catch(e=>{ alert("❌ خطأ في الإرسال"); console.log(e); });
-}
+        alert("📩 تم إرسال رسالة التأكيد");
+        signupForm.reset();
+        signupForm.style.display="none";
+        buttons.style.display="block";
+    });
+};
 
-// ======== LOGIN ========
+/* ====== LOGIN ====== */
 loginForm.onsubmit = function(e){
     e.preventDefault();
-    const email = document.getElementById("liEmail").value;
-    const password = document.getElementById("liPassword").value;
+
+    const email = liEmail.value;
+    const password = liPassword.value;
 
     let accounts = getAccounts();
-    let acc = accounts.find(a=>a.email===email && a.password===password && a.confirmed);
+    let user = accounts.find(
+        a => a.email===email && a.password===password && a.confirmed
+    );
 
-    if(acc){
-        localStorage.setItem("loggedIn","true");
-        alert("✅ تسجيل الدخول ناجح");
-        window.location.href="home.html";
-    } else {
-        alert("❌ بيانات غير صحيحة أو الحساب لم يتم تأكيده");
+    if(!user){
+        alert("❌ بيانات خاطئة أو الحساب غير مؤكد");
+        return;
     }
-}
-</script>
 
+    localStorage.setItem("loggedIn","true");
+    localStorage.setItem("currentUser",email);
+    window.location.href="home.html";
+};
+</script>
 </body>
 </html>
