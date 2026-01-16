@@ -6,74 +6,60 @@
 <title>الصفحة الرئيسية</title>
 <style>
 body { font-family: Arial; text-align:center; background:#f0f0f0; padding:40px; }
-button { padding:10px 20px; margin-top:10px; border:none; border-radius:5px; background:#4CAF50; color:white; cursor:pointer; }
-.logoutBtn { background:#f44336; }
+button { padding:10px 20px; margin:10px; border:none; border-radius:5px; cursor:pointer; }
+.logout { background:#f44336; color:white; }
 input { display:block; margin:10px auto; padding:10px; width:250px; }
-#changePassForm { display:none; margin-top:20px; }
+#changePass { display:none; }
 </style>
 </head>
 <body>
 
 <h1>الصفحة الرئيسية</h1>
-<p>أنت الآن مسجل ومؤكد ✅</p>
+<p>أنت مسجل دخولًا ✅</p>
 
-<button class="logoutBtn" onclick="logout()">تسجيل الخروج</button>
-<button onclick="showChangePass()">تغيير كلمة المرور</button>
+<button onclick="showChange()">تغيير كلمة المرور</button>
+<button class="logout" onclick="logout()">تسجيل الخروج</button>
 
-<!-- CHANGE PASSWORD FORM -->
-<div id="changePassForm">
-    <h3>تغيير كلمة المرور</h3>
-    <input type="password" id="oldPass" placeholder="كلمة المرور القديمة" required>
-    <input type="password" id="newPass" placeholder="كلمة المرور الجديدة" required>
-    <button onclick="changePassword()">تحديث كلمة المرور</button>
+<div id="changePass">
+    <input type="password" id="oldPass" placeholder="كلمة المرور القديمة">
+    <input type="password" id="newPass" placeholder="كلمة المرور الجديدة">
+    <button onclick="changePassword()">حفظ</button>
 </div>
 
 <script>
-// حماية الصفحة
-if(localStorage.getItem("loggedIn") !== "true"){
-    window.location.href="index.html";
+if(
+    localStorage.getItem("loggedIn") !== "true" ||
+    !localStorage.getItem("currentUser")
+){
+    location.href="index.html";
 }
 
-// جلب البريد الحالي
-const currentEmail = localStorage.getItem("currentUser");
+const email = localStorage.getItem("currentUser");
 
-// تسجيل الخروج مع تأكيد
 function logout(){
-    if(confirm("⚠️ هل أنت متأكد من تسجيل الخروج؟")){
-        localStorage.removeItem("loggedIn");
-        localStorage.removeItem("currentUser");
-        window.location.href="index.html";
+    if(confirm("هل أنت متأكد من تسجيل الخروج؟")){
+        localStorage.clear();
+        location.href="index.html";
     }
 }
 
-// إظهار فورم تغيير كلمة المرور
-function showChangePass(){
-    document.getElementById("changePassForm").style.display = "block";
+function showChange(){
+    changePass.style.display="block";
 }
 
-// تغيير كلمة المرور
 function changePassword(){
-    const oldPass = document.getElementById("oldPass").value;
-    const newPass = document.getElementById("newPass").value;
-
     let accounts = JSON.parse(localStorage.getItem("accounts")) || [];
-    let user = accounts.find(a => a.email === currentEmail);
+    let user = accounts.find(a=>a.email===email);
 
-    if(!user){
-        alert("❌ خطأ: الحساب غير موجود");
+    if(user.password !== oldPass.value){
+        alert("❌ كلمة المرور القديمة خاطئة");
         return;
     }
 
-    if(user.password !== oldPass){
-        alert("❌ كلمة المرور القديمة غير صحيحة");
-        return;
-    }
-
-    user.password = newPass;
+    user.password = newPass.value;
     localStorage.setItem("accounts", JSON.stringify(accounts));
-    alert("✅ تم تحديث كلمة المرور بنجاح");
-    document.getElementById("changePassForm").reset?.(); // لو فيه reset
-    document.getElementById("changePassForm").style.display = "none";
+    alert("✅ تم تغيير كلمة المرور");
+    changePass.style.display="none";
 }
 </script>
 
