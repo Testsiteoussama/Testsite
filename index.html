@@ -26,7 +26,6 @@ button {
     border: none;
     border-radius: 8px;
     margin-top: 10px;
-    position: relative;
 }
 
 button:hover:not([disabled]) {
@@ -65,20 +64,20 @@ input {
 
 <div class="page1" id="page1">
     <h1>مرحبا بك!</h1>
-    <button id="enterBtn">ادخل معلوماتك</button>
+    <button id="enterBtn">احصل على رسالة تأكيد</button>
     <div id="countdown"></div>
 </div>
 
 <form id="infoForm">
-    <h3>اكتب المعلومات المطلوبة</h3>
+    <h3>اكتب معلوماتك لإرسال رسالة التأكيد</h3>
     <input type="text" id="name" placeholder="اسمك" required><br>
     <input type="email" id="email" placeholder="الإيميل" required><br>
-    <button type="submit">أرسل</button>
+    <button type="submit">أرسل الرسالة</button>
 </form>
 
 <div class="homePage" id="homePage">
     <h1>الصفحة الرئيسية</h1>
-    <button id="confirmBtn">تأكيد الحساب عبر الإيميل</button>
+    <p>أنت الآن مسجل ومؤكد!</p>
 </div>
 
 <!-- EmailJS -->
@@ -93,11 +92,10 @@ const page1 = document.getElementById("page1");
 const infoForm = document.getElementById("infoForm");
 const countdownEl = document.getElementById("countdown");
 const homePage = document.getElementById("homePage");
-const confirmBtn = document.getElementById("confirmBtn");
 
 const WAIT_TIME = 10 * 60 * 1000; // 10 دقائق
 
-// تحقق إذا المستخدم مسجل مسبقاً
+// إذا الجهاز مسجل مسبقاً
 if(localStorage.getItem("isRegistered") === "true") {
     page1.style.display = "none";
     infoForm.style.display = "none";
@@ -133,19 +131,22 @@ function startCountdown(seconds) {
 }
 
 enterBtn.onclick = () => {
-    // سجل وقت الضغط
-    localStorage.setItem("lastClickTime", Date.now());
-    disableButton(enterBtn, true);
-    startCountdown(WAIT_TIME/1000);
+    // عند الضغط يظهر الفورم لإدخال الإيميل
     page1.style.display = "none";
     infoForm.style.display = "block";
 };
 
+// عند إرسال الفورم لإرسال رسالة التأكيد
 infoForm.onsubmit = function(e) {
     e.preventDefault();
 
     const userName = document.getElementById("name").value;
     const userEmail = document.getElementById("email").value;
+
+    // سجل وقت الضغط للانتظار
+    localStorage.setItem("lastClickTime", Date.now());
+    disableButton(enterBtn, true);
+    startCountdown(WAIT_TIME/1000);
 
     emailjs.send(
         "service_j39gu7v",
@@ -155,15 +156,14 @@ infoForm.onsubmit = function(e) {
             to_email: userEmail,
             from_name: "موقع التسجيل",
             reply_to: userEmail,
-            message: "تم تسجيلك بنجاح، شكراً لك!"
+            message: "✅ اضغط هذا الزر في الموقع لتأكيد حسابك: \n[تأكيد الحساب]"
         }
     )
     .then(() => {
-        alert("✅ تم إرسال رسالة تأكيد إلى إيميلك");
+        alert("📩 تم إرسال رسالة التأكيد إلى إيميلك. يجب الضغط على رابط التأكيد داخل الرسالة لتفعيل الحساب.");
         infoForm.reset();
-        localStorage.setItem("isRegistered", "true"); // حفظ حالة التسجيل
         infoForm.style.display = "none";
-        homePage.style.display = "block";
+        page1.style.display = "block"; // نرجع للصفحة الأولى لكن الزر معطل مؤقتاً
     })
     .catch((error) => {
         alert("❌ خطأ في الإرسال");
@@ -171,11 +171,19 @@ infoForm.onsubmit = function(e) {
     });
 };
 
-// زر تأكيد الحساب
-confirmBtn.onclick = () => {
-    alert("✅ تم تأكيد الحساب عبر الإيميل");
+// هذه الدالة تحاكي الضغط على زر التأكيد من الإيميل
+// في الواقع، يجب أن يكون رابط في الإيميل يعيدك لصفحة مع كود لتأكيد الحساب
+function confirmAccount() {
+    alert("✅ تم تأكيد الحساب!");
     localStorage.setItem("isRegistered", "true");
-};
+    page1.style.display = "none";
+    infoForm.style.display = "none";
+    homePage.style.display = "block";
+}
+
+// مثال: لتجربة، يمكنك استدعاء confirmAccount() من console
+// confirmAccount();
 </script>
+
 </body>
 </html>
