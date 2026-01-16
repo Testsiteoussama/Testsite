@@ -6,11 +6,22 @@
 <title>الصفحة الرئيسية</title>
 <style>
 body { font-family: Arial; text-align:center; background:#f0f0f0; padding:40px; }
+button { padding:10px 20px; margin-top:20px; border:none; border-radius:5px; background:#f44336; color:white; cursor:pointer; }
 </style>
 </head>
 <body>
+
 <h1>الصفحة الرئيسية</h1>
 <p>أنت الآن مسجل ومؤكد ✅</p>
-<p>يمكنك تسجيل الدخول من أي جهاز بعد التأكيد</p>
+
+<button onclick="logout()">تسجيل الخروج</button>
+
+<script>
+function logout(){
+    localStorage.removeItem("loggedIn");
+    window.location.href="index.html";
+}
+</script>
+
 </body>
 </html>
