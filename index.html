@@ -19,6 +19,7 @@ form { display:none; }
     <button onclick="showLogin()">تسجيل الدخول</button>
 </div>
 
+<!-- SIGN UP FORM -->
 <form id="signupForm">
     <h3>إنشاء حساب</h3>
     <input type="email" id="suEmail" placeholder="الإيميل" required>
@@ -26,6 +27,7 @@ form { display:none; }
     <button type="submit">إرسال رسالة التأكيد</button>
 </form>
 
+<!-- LOGIN FORM -->
 <form id="loginForm">
     <h3>تسجيل الدخول</h3>
     <input type="email" id="liEmail" placeholder="الإيميل" required>
@@ -37,22 +39,26 @@ form { display:none; }
 <script>
 emailjs.init("S1Mw-eSIERnBhM8ri");
 
-// HELPERS
-function getAccounts(){ return JSON.parse(localStorage.getItem("accounts"))||[]; }
+// ======== HELPERS ========
+function getAccounts(){ return JSON.parse(localStorage.getItem("accounts")) || []; }
 function saveAccounts(acc){ localStorage.setItem("accounts", JSON.stringify(acc)); }
 
-// UI
+// ======== AUTO REDIRECT IF LOGGED IN ========
+if(localStorage.getItem("loggedIn") === "true"){
+    window.location.href="home.html";
+}
+
+// ======== UI FUNCTIONS ========
 function showSignup(){ buttons.style.display="none"; signupForm.style.display="block"; }
 function showLogin(){ buttons.style.display="none"; loginForm.style.display="block"; }
 
-// SIGN UP
+// ======== SIGN UP ========
 signupForm.onsubmit = function(e){
     e.preventDefault();
     const email = document.getElementById("suEmail").value;
     const password = document.getElementById("suPassword").value;
 
     let accounts = getAccounts();
-    // تحقق من عدم تكرار الحساب
     if(accounts.find(a=>a.email===email)){
         alert("❌ هذا الإيميل مسجل مسبقاً");
         return;
@@ -61,7 +67,6 @@ signupForm.onsubmit = function(e){
     accounts.push({email,password,confirmed:false});
     saveAccounts(accounts);
 
-    // رابط التأكيد
     const confirmLink = `https://testsiteoussama.github.io/Testsite/confirm.html?email=${encodeURIComponent(email)}`;
 
     emailjs.send(
@@ -80,15 +85,17 @@ signupForm.onsubmit = function(e){
     }).catch(e=>{ alert("❌ خطأ في الإرسال"); console.log(e); });
 }
 
-// LOGIN
+// ======== LOGIN ========
 loginForm.onsubmit = function(e){
     e.preventDefault();
     const email = document.getElementById("liEmail").value;
     const password = document.getElementById("liPassword").value;
+
     let accounts = getAccounts();
     let acc = accounts.find(a=>a.email===email && a.password===password && a.confirmed);
 
     if(acc){
+        localStorage.setItem("loggedIn","true");
         alert("✅ تسجيل الدخول ناجح");
         window.location.href="home.html";
     } else {
